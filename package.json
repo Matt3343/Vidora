@@ -1,0 +1,9 @@
+{
+  "name":"vidora-invidious",
+  "version":"1.2.0",
+  "private":true,
+  "description":"Vidora - Node.js Invidious frontend with instance management and failover",
+  "main":"server.js",
+  "scripts":{"start":"node server.js","dev":"node --watch server.js"},
+  "dependencies":{"express":"^5.1.0"}
+}
