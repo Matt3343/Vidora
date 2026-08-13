@@ -1,0 +1,14 @@
+{
+  "name": "vidora-invidious",
+  "version": "1.0.0",
+  "private": true,
+  "description": "YouTube-like frontend with a Node.js Invidious proxy and automatic instance failover",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}
