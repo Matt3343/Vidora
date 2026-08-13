@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Vidora 1.4</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#0f0f0f;color:#f5f5f5;font:15px Arial,sans-serif}
+header{height:64px;background:#111;display:flex;align-items:center;gap:18px;padding:0 20px;position:sticky;top:0;z-index:10;border-bottom:1px solid #252525}
+.logo{font-size:22px;font-weight:800;color:#ff3b30}.logo span{color:#fff}.search{display:flex;max-width:720px;flex:1;margin:auto}
+.search input{flex:1;background:#181818;border:1px solid #444;color:#fff;padding:12px 16px;border-radius:24px 0 0 24px;outline:none}.search button{width:60px;background:#292929;color:#fff;border:1px solid #444;border-left:0;border-radius:0 24px 24px 0}
+button{cursor:pointer}.gear{background:transparent;border:0;color:#fff;font-size:21px;padding:8px}.side{width:220px;position:fixed;top:64px;bottom:0;background:#111;padding:18px 10px}.nav{display:block;color:#ddd;text-decoration:none;padding:12px 14px;border-radius:9px;margin-bottom:4px}.nav:hover{background:#272727}
+main{margin-left:220px;padding:24px;width:calc(100% - 220px)}h1{font-size:25px}.chips{display:flex;gap:9px;overflow:auto;margin-bottom:20px}.chip{border:0;background:#292929;color:#fff;padding:9px 14px;border-radius:18px;white-space:nowrap}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(245px,1fr));gap:28px 17px}.card{cursor:pointer}.thumb{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:9px;background:#222}.title{font-weight:700;line-height:1.35;margin:9px 0 5px}.meta{color:#999;font-size:13px;line-height:1.4}.loading,.empty{text-align:center;padding:70px;color:#999}
+.playerPage{display:none}.back{background:#292929;color:#fff;border:0;border-radius:8px;padding:10px 14px;margin-bottom:16px}.player{width:100%;aspect-ratio:16/9;background:#000;border:0;border-radius:9px}.videoTitle{font-size:23px;font-weight:700;margin:17px 0 6px}.description{background:#1d1d1d;border-radius:9px;padding:16px;margin-top:15px;white-space:pre-wrap;line-height:1.5;color:#ddd}
+.status{position:fixed;right:15px;bottom:15px;background:#1b1b1b;border:1px solid #333;border-radius:8px;padding:8px 12px;color:#aaa;font-size:12px}.modal{display:none;position:fixed;inset:0;background:#000b;z-index:50;align-items:center;justify-content:center;padding:20px}.modal.open{display:flex}.box{width:min(800px,100%);max-height:88vh;overflow:auto;background:#1c1c1c;border:1px solid #444;border-radius:14px;padding:22px}.box p{color:#aaa;line-height:1.5}.add{display:flex;gap:8px;margin:15px 0}.add input{flex:1;background:#111;border:1px solid #555;color:#fff;padding:11px;border-radius:8px}.add button,.save,.discover{background:#fff;color:#111;border:0;border-radius:8px;padding:10px 14px;font-weight:700}.discover{width:100%;margin-bottom:12px}
+.inst{display:flex;align-items:center;gap:8px;background:#111;padding:11px;border-radius:8px;margin:7px 0}.dot{width:9px;height:9px;border-radius:50%;background:#777;flex:none}.dot.ok{background:#55d66b}.dot.bad{background:#e65353}.inst span{flex:1;word-break:break-all;color:#ddd}.small{background:#292929;color:#fff;border:0;padding:7px 9px;border-radius:6px}.remove{background:#3a1f1f;color:#ffaaa0}.notice{display:none;padding:11px;border-radius:8px;margin:10px 0;background:#252515;border:1px solid #55552a;color:#eee}
+@media(max-width:800px){.side{display:none}main{margin-left:0;width:100%;padding:15px}.grid{grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:20px 10px}header{padding:0 10px}.logo{font-size:18px}}
+</style>
+</head>
+<body>
+<header><div class="logo">VID<span>ORA</span></div><form class="search" id="sf"><input id="q" placeholder="Videos suchen …"><button>⌕</button></form><button class="gear" onclick="settings()">⚙</button></header>
+<aside class="side"><a class="nav active" href="#" onclick="home();return false">⌂ &nbsp; Startseite</a><a class="nav" href="#" onclick="trend();return false">🔥 &nbsp; Trends</a><a class="nav" href="#" onclick="settings();return false">⚙ &nbsp; Instanzen</a></aside>
+<main>
+<section id="home"><div class="chips"><button class="chip" onclick="search('Musik')">Musik</button><button class="chip" onclick="search('Gaming')">Gaming</button><button class="chip" onclick="search('Technologie')">Technologie</button><button class="chip" onclick="search('Sport')">Sport</button></div><h1 id="h">Empfehlungen</h1><div id="grid" class="grid"></div></section>
+<section id="vp" class="playerPage"><button class="back" onclick="showHome()">← Zurück</button><iframe id="player" class="player" allowfullscreen allow="autoplay; encrypted-media; picture-in-picture"></iframe><div id="vt" class="videoTitle"></div><div id="vm" class="meta"></div><div id="vd" class="description"></div></section>
+</main>
+<div class="status">Invidious: <span id="status">–</span></div>
+<div class="modal" id="modal"><div class="box"><h2>⚙ Invidious-Instanzen</h2><p>Jede Instanz wird getrennt getestet: Website, Stats, Suche und Trends. Ein einzelner 404 macht die Instanz nicht automatisch unbrauchbar.</p>
+<button class="discover" onclick="discover()">🔍 Instanzen automatisch suchen</button>
+<div class="add"><input id="new" placeholder="https://invidious.example.com"><button onclick="add()">Hinzufügen</button></div><div id="notice" class="notice"></div><div id="list"></div><br><button class="save" onclick="closeSettings()">Fertig</button></div></div>
+<script>
+const $=x=>document.getElementById(x),grid=$("grid");
+async function api(u,o={}){let r;try{r=await fetch(u,o)}catch{throw Error("Vercel-API nicht erreichbar.")}let d={};try{d=await r.json()}catch{}if(!r.ok)throw Error(d.error||d.details||("HTTP "+r.status));return d}
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
+function thumb(v){return v.videoThumbnails?.find(x=>x.quality==="medium")?.url||v.videoThumbnails?.[0]?.url||`https://i.ytimg.com/vi/${v.videoId}/hqdefault.jpg`}
+function card(v){return `<article class="card" onclick="video('${esc(v.videoId)}')"><img class="thumb" src="${esc(thumb(v))}" loading="lazy" onerror="this.src='https://i.ytimg.com/vi/${esc(v.videoId)}/hqdefault.jpg'"><div class="title">${esc(v.title||"Unbekanntes Video")}</div><div class="meta">${esc(v.author||"")}${v.viewCount?"<br>"+Number(v.viewCount).toLocaleString("de-DE")+" Aufrufe":""}</div></article>`}
+function status(x){try{$("status").textContent=new URL(x).host}catch{$("status").textContent=x||"–"}}
+async function load(u,t){$("h").textContent=t;grid.innerHTML='<div class="loading">Lade Videos …</div>';try{let r=await api(u);status(r.instance);let a=(r.data||[]).filter(x=>x.type==="video");grid.innerHTML=a.length?a.map(card).join(""):'<div class="empty">Keine Videos gefunden.</div>'}catch(e){grid.innerHTML=`<div class="empty">${esc(e.message)}</div>`;$("status").textContent="Fehler"}}
+function home(){showHome();load("/api/trending","Empfehlungen")}function trend(){showHome();load("/api/trending","Trends")}function search(q){showHome();q=q||$("q").value.trim();if(q)load("/api/search?q="+encodeURIComponent(q),"Suchergebnisse für „"+q+"“")}
+$("sf").onsubmit=e=>{e.preventDefault();search()}
+async function video(id){$("home").style.display="none";$("vp").style.display="block";$("player").src="";try{let r=await api("/api/video?id="+encodeURIComponent(id));status(r.instance);let v=r.data;$("vt").textContent=v.title||"";$("vm").textContent=(v.author||"")+(v.viewCount?" · "+Number(v.viewCount).toLocaleString("de-DE")+" Aufrufe":"");$("vd").textContent=v.description||"Keine Beschreibung.";$("player").src=r.instance+"/embed/"+encodeURIComponent(id)}catch(e){$("vt").textContent="Video konnte nicht geladen werden.";$("vd").textContent=e.message;$("status").textContent="Fehler"}}
+function showHome(){$("vp").style.display="none";$("home").style.display="block"}async function settings(){$("modal").classList.add("open");await refresh()}function closeSettings(){$("modal").classList.remove("open")}
+function note(x){$("notice").textContent=x;$("notice").style.display="block";setTimeout(()=>$("notice").style.display="none",8000)}
+async function refresh(){
+  try{
+    let r=await api("/api/instances");
+    $("list").innerHTML=r.instances.map(x=>`
+      <div class="inst">
+        <i class="dot ${x.usable?"ok":(x.website?.ok?"bad":"bad")}"></i>
+        <span>
+          <b>${esc(x.instance)}</b><br>
+          <small>Website: ${x.website?.ok?"✓":"✕"} · Stats: ${x.stats?.ok?"✓":(x.stats?.error||"✕")} · Suche: ${x.search?.ok?"✓":(x.search?.error||"✕")} · Trends: ${x.trending?.ok?"✓":(x.trending?.error||"✕")}</small>
+        </span>
+        <button class="small" onclick="check('${esc(x.instance)}')">Prüfen</button>
+        <button class="small remove" onclick="removeI('${esc(x.instance)}')">Löschen</button>
+      </div>`).join("");
+  }catch(e){note(e.message)}
+}
+async function discover(){
+  note("🔍 Offizielle Invidious-Instanzliste wird geladen und jede Instanz einzeln geprüft …");
+  try{
+    let r=await api("/api/discover");
+    let good=(r.instances||[]).filter(x=>x.usable);
+    for(const x of good){
+      try{await api("/api/instances",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({url:x.instance})})}catch{}
+    }
+    await refresh();
+    note(`✓ ${good.length} Instanz(en) haben mindestens einen funktionierenden API-Endpunkt.`);
+  }catch(e){note("Suche fehlgeschlagen: "+e.message)}
+}
+async function add(){
+  let input=$("new"),url=input.value.trim();
+  if(!url)return note("Bitte URL eingeben.");
+  try{
+    let r=await api("/api/instances",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({url})});
+    input.value="";await refresh();
+    note(r.diagnosis?.usable?"✓ Instanz hinzugefügt – API funktioniert.":"✓ Instanz gespeichert. Siehe die Einzeltests.");
+  }catch(e){note("Fehler: "+e.message)}
+}
+async function removeI(url){
+  if(!confirm("Instanz wirklich entfernen?"))return;
+  try{await api("/api/instances",{method:"DELETE",headers:{"Content-Type":"application/json"},body:JSON.stringify({url})});refresh()}
+  catch(e){note(e.message)}
+}
+async function check(url){
+  try{
+    let r=await api("/api/instances",{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({url})});
+    note(`${r.usable?"✓ API funktioniert":"⚠ API nicht nutzbar"} — Website ${r.website?.ok?"OK":"Fehler"}, Suche ${r.search?.ok?"OK":"Fehler"}, Trends ${r.trending?.ok?"OK":"Fehler"}`);
+  }catch(e){note("✕ "+e.message)}
+  refresh()
+}
+home();
+</script>
+</body>
+</html>
