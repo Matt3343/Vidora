@@ -1,0 +1,6 @@
+{
+  "name": "vidora-vercel",
+  "version": "1.4.0",
+  "private": true,
+  "scripts": { "dev": "vercel dev" }
+}
